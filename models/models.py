@@ -26,7 +26,7 @@ class Organisation(Base):
 
     uuid = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
-    name = mapped_column(String, nullable=False)
+    name = mapped_column(String, nullable=False, unique=True)
     status = mapped_column(Integer, default=0, nullable=False)
     personal = mapped_column(Boolean, default=False, nullable=True)
     settings = mapped_column(
@@ -45,7 +45,7 @@ class User(Base):
 
     uuid = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
-    email = mapped_column(String, nullable=False)
+    email = mapped_column(String, nullable=False, unique=True)
     password = mapped_column(LargeBinary, nullable=False)
     profile = mapped_column(
         JSONB,
@@ -65,13 +65,11 @@ class User(Base):
     updated_at = mapped_column(DateTime, onupdate=datetime.now(timezone.utc))
 
     def hash_password(self, password):
-        self.hashed_password = bcrypt.hashpw(
-            password.encode("utf-8"), bcrypt.gensalt(14)
-        )
-        print(self.hashed_password)
+        self.password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(14))
+        print(self.password)
 
     def verify_password(self, password):
-        if bcrypt.checkpw(password.encode("utf-8"), self.hashed_password):
+        if bcrypt.checkpw(password.encode("utf-8"), self.password):
             return True
         else:
             return False
@@ -82,7 +80,7 @@ class Role(Base):
 
     uuid = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
-    name = mapped_column(String, nullable=False)
+    name = mapped_column(String, nullable=False, unique=True)
     description = mapped_column(String, nullable=True)
     org_uuid = mapped_column(
         UUID(as_uuid=True),
