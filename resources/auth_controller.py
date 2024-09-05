@@ -21,7 +21,7 @@ def get_config():
 
 @router.post("/signup")
 def signup(
-    req_body: auth_schemas.AuthBase,
+    req_body: auth_schemas.RegisterUser,
     db: Session = Depends(get_db),
 ):
     db_user = get_user_by_email(db=db, email=req_body.email)
@@ -43,17 +43,18 @@ def signup(
     return {"message": "success", "data": jsonable_encoder(db_member)}
 
 
-@router.post("/signin")
+@router.get("/signin")
 def signin(
-    req_body: auth_schemas.AuthBase,
+    email: str,
+    password: str,
     db: Session = Depends(get_db),
     authorize: AuthJWT = Depends(),
 ):
-    db_user = get_user_by_email(db=db, email=req_body.email)
+    db_user = get_user_by_email(db=db, email=email)
     if not db_user:
         raise HTTPException(status_code=400, detail="Invalid User")
 
-    if not db_user.verify_password(req_body.password):
+    if not db_user.verify_password(password):
         raise HTTPException(status_code=400, detail="Password Mismatch")
 
     if not db_user.status:
@@ -76,3 +77,23 @@ def signin(
         "refresh_token": refresh_token,
         "token_type": "bearer",
     }
+
+
+@router.patch("/reset_password")
+def reset_password(
+    req_body: auth_schemas.AuthBase,
+    db: Session = Depends(get_db),
+):
+    db_user = get_user_by_email(db=db, email=req_body.email)
+    if not db_user:
+        raise HTTPException(status_code=400, detail="Invalid User")
+
+    if db_user.verify_password(req_body.password):
+        raise HTTPException(
+            status_code=400,
+            detail="This password has been used previously, please choose a different password.",
+        )
+
+    db_user.hash_password(req_body.password)
+    db.commit()
+    return {"message": "Password set successfully"}
