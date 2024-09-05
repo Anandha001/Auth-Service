@@ -1,3 +1,5 @@
 alembic
 psycopg2-binary
 bcrypt
+fastapi==0.99.1
+uvicorn[standard]
