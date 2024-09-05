@@ -21,6 +21,6 @@ def create_member(db: Session, org_uuid: UUID, user_uuid: UUID) -> models.Member
         status=1,
     )
     db.add(db_member)
-    db.commit()
+    db.flush()
     db.refresh(db_member)
     return db_member

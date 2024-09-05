@@ -13,6 +13,6 @@ def get_organisation_by_name(db: Session, name: str) -> models.Organisation:
 def create_organisation(db: Session, name: str) -> models.Organisation:
     db_organisation = models.Organisation(name=name, status=1)
     db.add(db_organisation)
-    db.commit()
+    db.flush()
     db.refresh(db_organisation)
     return db_organisation

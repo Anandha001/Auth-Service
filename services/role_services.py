@@ -19,10 +19,9 @@ def create_role(
     db_role = models.Role(
         name=name,
         description=description,
-        status=1,
         org_uuid=org_uuid,
     )
     db.add(db_role)
-    db.commit()
+    db.flush()
     db.refresh(db_role)
     return db_role

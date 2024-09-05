@@ -12,6 +12,6 @@ def create_user(db: Session, email: str, password: str) -> models.User:
     db_user = models.User(email=email.lower(), status=1)
     db_user.hash_password(password)
     db.add(db_user)
-    db.commit()
+    db.flush()
     db.refresh(db_user)
     return db_user

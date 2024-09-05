@@ -88,6 +88,9 @@ class Role(Base):
         nullable=False,
     )
 
+    created_at = mapped_column(DateTime, default=datetime.now(timezone.utc))
+    updated_at = mapped_column(DateTime, onupdate=datetime.now(timezone.utc))
+
 
 class Member(Base):
     __tablename__ = "member"

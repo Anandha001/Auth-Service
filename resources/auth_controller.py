@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.encoders import jsonable_encoder
 from models import get_db
 from models.schemas import auth_schemas
 from sqlalchemy.orm import Session
@@ -29,4 +30,6 @@ def signup(
         db=db, org_uuid=db_organisation.uuid, user_uuid=db_user.uuid
     )
 
-    return {"message": "success", "data": db_member}
+    db.commit()
+    db.refresh(db_member)
+    return {"message": "success", "data": jsonable_encoder(db_member)}
