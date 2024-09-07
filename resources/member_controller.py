@@ -5,10 +5,14 @@ from sqlalchemy import delete, update
 from models import get_db, models
 from models.schemas import member_schemas
 from sqlalchemy.orm import Session
+from fastapi_jwt_auth import AuthJWT
 
+
+from services.email_services import email_sender
 from services.member_services import create_member
 from services.organisation_services import get_organisation_by_name
 from services.user_services import get_user_by_email
+from configs.base_config import BaseConfig
 
 router = APIRouter()
 
@@ -17,6 +21,7 @@ router = APIRouter()
 def invite_member(
     req_body: member_schemas.MemberBase,
     db: Session = Depends(get_db),
+    Authorize: AuthJWT = Depends(),
 ):
     db_user = get_user_by_email(db=db, email=req_body.email)
     if not db_user:
@@ -32,9 +37,17 @@ def invite_member(
         user_uuid=db_user.uuid,
         role_name=req_body.role_name,
     )
-
     db.commit()
     db.refresh(db_member)
+
+    email_sender(
+        db_user.email,
+        "Verification Email",
+        BaseConfig.VERIFICATION_TEMPLATE,
+        Authorize,
+        db_organisation.uuid,
+    )
+
     return {"message": "success", "data": jsonable_encoder(db_member)}
 
 
