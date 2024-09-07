@@ -32,18 +32,19 @@ def make_member(
     db_member = get_member(
         db=db, org_uuid=org_uuid, user_uuid=user_uuid, role_uuid=role_uuid
     )
-    if db_member:
+    if db_member and db_member.status:
         raise HTTPException(status_code=400, detail="Member already registered")
 
-    db_member = models.Member(
-        org_uuid=org_uuid,
-        user_uuid=user_uuid,
-        role_uuid=role_uuid,
-        status=1,
-    )
-    db.add(db_member)
-    db.flush()
-    db.refresh(db_member)
+    if not db_member:
+        db_member = models.Member(
+            org_uuid=org_uuid,
+            user_uuid=user_uuid,
+            role_uuid=role_uuid,
+        )
+        db.add(db_member)
+        db.flush()
+        db.refresh(db_member)
+
     return db_member
 
 

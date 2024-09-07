@@ -4,3 +4,5 @@ bcrypt
 fastapi==0.99.1
 uvicorn[standard]
 fastapi_jwt_auth
+pandas
+beautifulsoup4
